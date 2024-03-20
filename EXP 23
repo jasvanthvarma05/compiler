@@ -1,0 +1,51 @@
+%{
+#include <stdio.h>
+%}
+
+DIGIT           [0-9]
+LETTER          [a-zA-Z]
+ID              {LETTER}({LETTER}|{DIGIT})*
+NUMBER          {DIGIT}+(\.{DIGIT}+)?
+STRING          \"([^\n\"]|\\.)*\"
+WS              [ \t\n]
+
+%%
+
+"#include"      printf("<INCLUDE> %s\n", yytext);
+"void"          printf("<VOID> %s\n", yytext);
+"int"           printf("<INT> %s\n", yytext);
+"printf"        printf("<PRINTF> %s\n", yytext);
+"="             printf("<ASSIGN> %s\n", yytext);
+";"             printf("<SEMICOLON> %s\n", yytext);
+","             printf("<COMMA> %s\n", yytext);
+"("             printf("<LPAREN> %s\n", yytext);
+")"             printf("<RPAREN> %s\n", yytext);
+"{"             printf("<LBRACE> %s\n", yytext);
+"}"             printf("<RBRACE> %s\n", yytext);
+{ID}            printf("<ID> %s\n", yytext);
+{NUMBER}        printf("<NUMBER> %s\n", yytext);
+{STRING}        printf("<STRING> %s\n", yytext);
+{WS}            /* skip whitespace */
+.               printf("Invalid token: %s\n", yytext);
+
+%%
+
+int main()
+{
+    FILE *fp;
+    int c;
+    
+    fp = fopen("sample.c", "r");
+    if (fp == NULL) {
+        perror("Error opening file");
+        return -1;
+    }
+    
+    yyin = fp;
+    
+    yylex();
+    
+    fclose(fp);
+    
+    return 0;
+}
