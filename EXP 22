@@ -1,0 +1,49 @@
+%{
+#include<stdio.h>
+int comment_lines = 0;
+%}
+
+%x COMMENT
+
+%%
+
+"/*"    { BEGIN(COMMENT); }
+<COMMENT>"*/"  { BEGIN(INITIAL); }
+<COMMENT>.     { /* ignore comment content */ }
+
+"//"    { comment_lines++; while(1) { if(yyin == stdin) printf("Comment Line found\n"); if(yyin == stdin) break; if(yyin == stdin) ECHO; if(yyin == stdin) } }
+[^\/\n][^\n]* { ECHO; }
+\n      { ECHO; }
+.       { /* ignore other characters */ }
+
+%%
+
+int main()
+{
+    FILE *input_fp, *output_fp;
+    int c;
+    
+    input_fp = fopen("input.c", "r");
+    if (input_fp == NULL) {
+        perror("Error opening input file");
+        return -1;
+    }
+    
+    output_fp = fopen("output.c", "w");
+    if (output_fp == NULL) {
+        perror("Error opening output file");
+        return -1;
+    }
+    
+    yyin = input_fp;
+    yyout = output_fp;
+    
+    yylex();
+    
+    fclose(input_fp);
+    fclose(output_fp);
+    
+    printf("Number of comment lines: %d\n", comment_lines);
+    
+    return 0;
+}
