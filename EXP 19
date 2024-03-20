@@ -1,0 +1,29 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+int macro_count = 0;
+int header_count = 0;
+%}
+
+%option noyywrap
+
+%%
+"#define"   { macro_count++; }
+"#include"  { header_count++; }
+.           ; /* ignore other characters */
+%%
+
+int main() {
+    yyin = fopen("sample.c", "r");
+    if (yyin == NULL) {
+        fprintf(stderr, "Error opening file.\n");
+        return 1;
+    }
+
+    yylex();
+
+    fclose(yyin);
+    printf("Number of macros defined: %d\n", macro_count);
+    printf("Number of header files included: %d\n", header_count);
+    return 0;
+}
