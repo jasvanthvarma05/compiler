@@ -1,0 +1,61 @@
+%{
+#include <stdio.h>
+#include <string.h>
+
+int id_count = 0;
+int const_count = 0;
+int op_count = 0;
+int comment_flag = 0;
+
+void ignore_comment();
+%}
+
+%option noyywrap
+
+%{
+ignore_comment();
+%}
+
+DIGIT           [0-9]
+LETTER          [a-zA-Z]
+ID              {LETTER}({LETTER}|{DIGIT})*
+NUMBER          {DIGIT}+(\.{DIGIT}+)?
+WS              [ \t]
+COMMENT_START   "\/\*"
+COMMENT_END     "\*\/"
+
+%%
+
+{WS}+           /* ignore whitespace */
+{COMMENT_START} {
+    ignore_comment();
+}
+{ID}            { id_count++; printf("Identifier: %s\n", yytext); }
+{NUMBER}        { const_count++; printf("Constant: %s\n", yytext); }
+"=="|"!="|"<="|">="|"<"|">"|"&"|"\|"|"+"|"-"|"*"|"/" {
+    op_count++; printf("Operator: %s\n", yytext);
+}
+.               /* ignore other characters */
+
+%%
+
+void ignore_comment() {
+    int c;
+    while ((c = input()) != EOF) {
+        if (c == '*') {
+            if ((c = input()) == '/') {
+                return;
+            } else {
+                unput(c);
+            }
+        }
+    }
+}
+
+int main() {
+    yylex();
+    printf("Total identifiers: %d\n", id_count);
+    printf("Total constants: %d\n", const_count);
+    printf("Total operators: %d\n", op_count);
+    return 0;
+}
