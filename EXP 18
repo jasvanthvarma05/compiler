@@ -1,0 +1,25 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%option noyywrap
+
+%%
+[0-9]+      { printf("Constant: %s\n", yytext); }
+"\""([^"\n]|\\")*"\""     { printf("String Constant: %s\n", yytext); }
+.           ; /* ignore other characters */
+%%
+
+int main() {
+    yyin = fopen("sample.c", "r");
+    if (yyin == NULL) {
+        fprintf(stderr, "Error opening file.\n");
+        return 1;
+    }
+
+    yylex();
+
+    fclose(yyin);
+    return 0;
+}
