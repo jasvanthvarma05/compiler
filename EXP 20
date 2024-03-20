@@ -1,0 +1,24 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%option noyywrap
+
+%%
+"<"[a-zA-Z0-9]+(">")?    { printf("HTML Tag: %s\n", yytext); }
+.                        ; /* ignore other characters */
+%%
+
+int main() {
+    yyin = fopen("sample.html", "r");
+    if (yyin == NULL) {
+        fprintf(stderr, "Error opening file.\n");
+        return 1;
+    }
+
+    yylex();
+
+    fclose(yyin);
+    return 0;
+}
